@@ -1,5 +1,7 @@
 package org.enes.newsapi.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.enes.newsapi.annotation.ValidateRequestParams;
 import org.enes.newsapi.entity.NewsEntity;
 import org.enes.newsapi.repository.NewsRepository;
 import org.enes.newsapi.service.NewsService;
@@ -11,7 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/news")
@@ -24,6 +29,7 @@ public class NewsController {
     }
 
     @GetMapping
+    @ValidateRequestParams(allowed = {"page", "size", "sortBy", "sortDir"})
     public ResponseEntity<Page<NewsEntity>> getAllNews(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -46,12 +52,19 @@ public class NewsController {
     }
 
     @GetMapping("/search")
+    @ValidateRequestParams(allowed = {"title", "page", "size", "sortBy", "sortDir"})
     public ResponseEntity<List<NewsEntity>> getNewsByTitleContaining(
             @RequestParam String title,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "pubDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<NewsEntity> pageResult = newsService.findByTitleContaining(title, pageable);
         return ResponseEntity.ok(pageResult.getContent());
     }
