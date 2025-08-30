@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NewsRepository extends ElasticsearchRepository<NewsEntity, String> {
+    boolean existsByLink(String link);
 }

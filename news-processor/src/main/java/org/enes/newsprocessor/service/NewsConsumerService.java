@@ -20,8 +20,12 @@ public class NewsConsumerService {
     public void consume(String message) {
         try {
             NewsEntity news = objectMapper.readValue(message, NewsEntity.class);
-            newsRepository.save(news);
-            System.out.println("News added: " + news.getTitle());
+            if(!newsRepository.existsByLink(news.getLink())) {
+                newsRepository.save(news);
+                System.out.println("News added: " + news.getTitle());
+            } else {
+                System.out.println("Duplicate news skipped: " + news.getTitle());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
