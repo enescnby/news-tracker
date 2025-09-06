@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,5 +28,13 @@ public class NewsService {
 
     public Page<NewsEntity> findByTitleContaining(String title, Pageable pageable) {
         return newsRepository.findByTitleContainingIgnoreCase(title, pageable);
+    }
+
+    public Page<NewsEntity> findBySources(List<String> sources, Pageable pageable) {
+        return newsRepository.findBySourceIn(sources, pageable);
+    }
+
+    public Page<NewsEntity> findByTitleAndSources(String title, List<String> sources, Pageable pageable) {
+        return newsRepository.findByTitleContainingIgnoreCaseAndSourceIn(title, sources, pageable);
     }
 }

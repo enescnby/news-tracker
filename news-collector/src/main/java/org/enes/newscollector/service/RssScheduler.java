@@ -15,9 +15,9 @@ public class RssScheduler {
     private long interval;
 
     private final Map<String, String> feedUrls = Map.of(
-            "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", "NYTimes",
-            "https://www.theverge.com/rss/index.xml", "TheVerge",
-            "https://feeds.bbci.co.uk/news/technology/rss.xml", "BBCNews"
+            "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", "nytimes",
+            "https://www.theverge.com/rss/index.xml", "theverge",
+            "https://feeds.bbci.co.uk/news/technology/rss.xml", "bbcnews"
     );
 
     public RssScheduler(RssFeedService rssFeedService) {
