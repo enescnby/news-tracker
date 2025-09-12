@@ -62,7 +62,7 @@ public class NewsController {
         if (title != null && sources != null && !sources.isEmpty()){
             result = newsService.findByTitleAndSources(title, sources, pageable);
         } else if (title != null) {
-            result = newsService.findByTitleContaining(title, pageable);
+            result = newsService.findByTitleContainingWord(title, pageable);
         } else if (sources != null && !sources.isEmpty()){
             result = newsService.findBySources(sources, pageable);
         } else {
