@@ -26,8 +26,8 @@ public class NewsService {
         return newsRepository.findById(id);
     }
 
-    public Page<NewsEntity> findByTitleContaining(String title, Pageable pageable) {
-        return newsRepository.findByTitleContainingIgnoreCase(title, pageable);
+    public Page<NewsEntity> findByTitleContainingWord(String title, Pageable pageable) {
+        return newsRepository.findByTitleWordMatch(title, pageable);
     }
 
     public Page<NewsEntity> findBySources(List<String> sources, Pageable pageable) {
