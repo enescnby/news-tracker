@@ -1,7 +1,9 @@
 package org.enes.newsapi.controller;
 
 import org.enes.newsapi.annotation.ValidateRequestParams;
+import org.enes.newsapi.dto.NewsDto;
 import org.enes.newsapi.entity.NewsEntity;
+import org.enes.newsapi.exception.NewsNotFoundException;
 import org.enes.newsapi.service.NewsService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +27,7 @@ public class NewsController {
 
     @GetMapping
     @ValidateRequestParams(allowed = {"page", "size", "sortBy", "sortDir"})
-    public ResponseEntity<Page<NewsEntity>> getAllNews(
+    public ResponseEntity<Page<NewsDto>> getAllNews(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "pubDate") String sortBy,
@@ -35,18 +37,22 @@ public class NewsController {
 
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<NewsEntity> newsPage = newsService.findAll(pageable);
+        Page<NewsDto> dtoPage = newsPage.map(this::toDto);
 
-        return ResponseEntity.ok(newsPage);
+        return ResponseEntity.ok(dtoPage);
     }
 
     @GetMapping("/{id}")
-    public Optional<NewsEntity> getNewsById(@PathVariable String id) {
-        return newsService.findById(id);
+    public ResponseEntity<NewsDto> getNewsById(@PathVariable String id) {
+        NewsEntity entity = newsService.findById(id)
+                .orElseThrow(() -> new NewsNotFoundException(id));
+
+        return ResponseEntity.ok(this.toDto(entity));
     }
 
     @GetMapping("/search")
     @ValidateRequestParams(allowed = {"title", "sources", "page", "size", "sortBy", "sortDir"})
-    public ResponseEntity<Page<NewsEntity>> getNewsByTitleContaining(
+    public ResponseEntity<Page<NewsDto>> getNewsByTitleContaining(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) List<String> sources,
             @RequestParam(defaultValue = "0") int page,
@@ -69,12 +75,27 @@ public class NewsController {
             result = newsService.findAll(pageable);
         }
 
-        return ResponseEntity.ok(result);
+        Page<NewsDto> dtoPage = result.map(this::toDto);
+
+        return ResponseEntity.ok(dtoPage);
     }
 
     private Sort createSort(String sortBy, String sortDir) {
         return PaginationUtils.isAscending(sortDir)
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
+    }
+
+    private NewsDto toDto(NewsEntity entity) {
+        return new NewsDto(
+                entity.getId(),
+                entity.getTitle(),
+                entity.getLink(),
+                entity.getDescription(),
+                entity.getPubDate(),
+                entity.getSource(),
+                entity.getThumbnailUrl(),
+                entity.getContentUrl()
+        );
     }
 }
