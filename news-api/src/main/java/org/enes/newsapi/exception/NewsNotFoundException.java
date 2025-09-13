@@ -1,7 +1,10 @@
 package org.enes.newsapi.exception;
 
-public class NewsNotFoundException extends RuntimeException{
+import java.util.List;
+
+public class NewsNotFoundException extends NewsApiException {
     public NewsNotFoundException(String id) {
-        super("News not found with id: " + id);
+        super("News not found with id: " + id, "NEWS_NOT_FOUND", 
+              List.of("Please verify the news ID", "Check if news exists"));
     }
 }
