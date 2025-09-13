@@ -3,6 +3,9 @@ package org.enes.newsapi.controller;
 import org.enes.newsapi.annotation.ValidateRequestParams;
 import org.enes.newsapi.dto.NewsDto;
 import org.enes.newsapi.entity.NewsEntity;
+import org.enes.newsapi.exception.InvalidPageSizeException;
+import org.enes.newsapi.exception.InvalidSortDirectionException;
+import org.enes.newsapi.exception.InvalidSortFieldException;
 import org.enes.newsapi.exception.NewsNotFoundException;
 import org.enes.newsapi.service.NewsService;
 import org.springframework.data.domain.Page;
@@ -12,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 import org.enes.common.util.PaginationUtils;
 
 @RestController
@@ -33,6 +35,11 @@ public class NewsController {
             @RequestParam(defaultValue = "pubDate") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
+
+        validatePageSize(size);
+        validateSortDirection(sortDir);
+        validateSortField(sortBy);
+
         Sort sort = createSort(sortBy, sortDir);
 
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -60,6 +67,11 @@ public class NewsController {
             @RequestParam(defaultValue = "pubDate") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
+
+        validatePageSize(size);
+        validateSortDirection(sortDir);
+        validateSortField(sortBy);
+        
         Sort sort = createSort(sortBy, sortDir);
         Pageable pageable = PageRequest.of(page, size, sort);
 
@@ -97,5 +109,23 @@ public class NewsController {
                 entity.getThumbnailUrl(),
                 entity.getContentUrl()
         );
+    }
+
+    private void validatePageSize(int size) {
+        if (size < 1 || size > 100) {
+            throw new InvalidPageSizeException(size);
+        }
+    }
+
+    private void validateSortField(String sortBy) {
+        if (!sortBy.equalsIgnoreCase("pubDate") && !sortBy.equalsIgnoreCase("source")) {
+            throw new InvalidSortFieldException(sortBy);
+        }
+    }
+
+    private void validateSortDirection(String sortDir) {
+        if (!sortDir.equalsIgnoreCase("asc") && !sortDir.equalsIgnoreCase("desc")) {
+            throw new InvalidSortDirectionException(sortDir);
+        }
     }
 }
