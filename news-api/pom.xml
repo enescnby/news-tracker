@@ -35,6 +35,13 @@
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
         </dependency>
 
+        <!-- Logging dependencies -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.4</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
