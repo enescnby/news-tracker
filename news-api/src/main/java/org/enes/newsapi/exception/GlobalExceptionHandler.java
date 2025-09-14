@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     private final ErrorResponseBuilder errorResponseBuilder;
@@ -25,6 +27,8 @@ public class GlobalExceptionHandler {
         NewsNotFoundException ex,
         HttpServletRequest request
     ) {
+        log.warn("News not found with id: {} for path: {}", ex.getMessage(), request.getRequestURI());
+
         ErrorResponse errorResponse = errorResponseBuilder.buildFromException(ex, request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
@@ -34,6 +38,8 @@ public class GlobalExceptionHandler {
         InvalidRequestParamException ex,
         HttpServletRequest request
     ) {
+        log.warn("Invalid request parameters: {} for path: {}", ex.getMessage(), request.getRequestURI());
+
         ErrorResponse errorResponse = errorResponseBuilder.buildFromException(ex, request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -43,6 +49,8 @@ public class GlobalExceptionHandler {
         InvalidSortFieldException ex,
         HttpServletRequest request
     ) {
+        log.warn("Invalid sort field: {} for path: {}", ex.getMessage(), request.getRequestURI());
+
         ErrorResponse errorResponse = errorResponseBuilder.buildFromException(ex, request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -52,6 +60,8 @@ public class GlobalExceptionHandler {
         InvalidSortDirectionException ex,
         HttpServletRequest request
     ) {
+        log.warn("Invalid sort direction: {} for path: {}", ex.getMessage(), request.getRequestURI());
+
         ErrorResponse errorResponse = errorResponseBuilder.buildFromException(ex, request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -61,6 +71,8 @@ public class GlobalExceptionHandler {
         InvalidPageSizeException ex,
         HttpServletRequest request
     ) {
+        log.warn("Invalid page size: {} for path: {}", ex.getMessage(), request.getRequestURI());
+
         ErrorResponse errorResponse = errorResponseBuilder.buildFromException(ex, request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -70,6 +82,8 @@ public class GlobalExceptionHandler {
         Exception ex,
         HttpServletRequest request
     ) {
+        log.error("An unexpected error occurred: {} for path: {}", ex.getMessage(), request.getRequestURI());
+        
         ErrorResponse errorResponse = errorResponseBuilder.buildErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "Internal Server Error",
