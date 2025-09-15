@@ -15,12 +15,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.enes.newsapi.dto.ErrorResponse;
+
 import java.util.List;
 import org.enes.common.util.PaginationUtils;
 
 @RestController
 @RequestMapping("/api/news")
 @Slf4j
+@Tag(name = "News")
 public class NewsController {
 
     private final NewsService newsService;
@@ -29,6 +40,12 @@ public class NewsController {
         this.newsService = newsService;
     }
 
+    @Operation(summary = "Get all news", description = "Get all news with pagination and sorting")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved news"),
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters (ErrorResponse)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error (ErrorResponse)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping
     @ValidateRequestParams(allowed = {"page", "size", "sortBy", "sortDir"})
     public ResponseEntity<Page<NewsDto>> getAllNews(
@@ -55,6 +72,12 @@ public class NewsController {
         return ResponseEntity.ok(dtoPage);
     }
 
+    @Operation(summary = "Get news by id", description = "Get news by id if it exists")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved news"),
+        @ApiResponse(responseCode = "404", description = "News not found (ErrorResponse)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error (ErrorResponse)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping("/{id}")
     public ResponseEntity<NewsDto> getNewsById(@PathVariable String id) {
         log.info("GET /api/news/{} - retrieving news by id", id);
@@ -66,6 +89,20 @@ public class NewsController {
         return ResponseEntity.ok(this.toDto(entity));
     }
 
+    @Operation(summary = "Get news by filtering", description = "Get news by filtering about title or sources. Returns all news if no filters are provided.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved news"),
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters (ErrorResponse)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error (ErrorResponse)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @Parameters(value = {
+        @Parameter(name = "title", description = "News title (optional)"),
+        @Parameter(name = "sources", description = "News sources (optional)"),
+        @Parameter(name = "page", description = "Page number (0-indexed) (optional)"),
+        @Parameter(name = "size", description = "Page size (1-100) (optional)"),
+        @Parameter(name = "sortBy", description = "Sort by field (pubDate or source) (optional)"),
+        @Parameter(name = "sortDir", description = "Sort direction (asc or desc) (optional)"),
+    })
     @GetMapping("/search")
     @ValidateRequestParams(allowed = {"title", "sources", "page", "size", "sortBy", "sortDir"})
     public ResponseEntity<Page<NewsDto>> getNewsByTitleContaining(
